@@ -38,39 +38,6 @@ public class DemoApplication {
 
 	}
 
-	// @Bean
-	// public BrokerService broker() throws Exception {
-	// BrokerService broker = new BrokerService();
-	// broker.setUseJmx(true);
-	// broker.addConnector("tcp://localhost:61616");
-
-	// return broker;
-	// }
-
-	@Bean // (initMethod = "start", destroyMethod = "stop")
-	public BrokerService brokerService() throws Exception {
-		BrokerService brokerService = new BrokerService();
-		// brokerService.setPersistent(false);
-		brokerService.setPersistenceAdapter(new MemoryPersistenceAdapter());
-		brokerService.setUseJmx(false);
-		// brokerService.addConnector("vm://localhost:0");
-		brokerService.addConnector("tcp://localhost:61616");
-		brokerService.setBrokerName("broker");
-		brokerService.setUseShutdownHook(false);
-
-		// enable authentication
-		List<AuthenticationUser> users = new ArrayList<>();
-		// username and password to use to connect to the broker.
-		// This user has users privilege (able to browse, consume, produce, list
-		// destinations)
-		users.add(new AuthenticationUser("user", "password", "users"));
-		SimpleAuthenticationPlugin plugin = new SimpleAuthenticationPlugin(users);
-		BrokerPlugin[] plugins = new BrokerPlugin[] { plugin };
-		brokerService.setPlugins(plugins);
-
-		return brokerService;
-	}
-
 	@Bean
 	public ApplicationRunner runner(JmsTemplate template) {
 		return args -> template.convertAndSend("foo", "AMessage");

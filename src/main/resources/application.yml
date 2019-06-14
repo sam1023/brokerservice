@@ -1,4 +1,8 @@
+logging:
+  config: classpath:log4j2.xml
+
 spring:
+  
   devtools:
     add-properties: true
 

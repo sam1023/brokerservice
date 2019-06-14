@@ -1,37 +1,43 @@
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:jms="http://www.springframework.org/schema/jms"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:amq="http://activemq.apache.org/schema/core"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-	                       http://www.springframework.org/schema/beans/spring-beans.xsd
-	                       http://www.springframework.org/schema/jms
-	                       http://www.springframework.org/schema/jms/spring-jms.xsd
-                           http://www.springframework.org/schema/context
-                           http://www.springframework.org/schema/context/spring-context.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:jms="http://www.springframework.org/schema/jms" 
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:amq="http://activemq.apache.org/schema/core" xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:org/springframework/beans/factory/xml/spring-beans.xsd
+                           http://www.springframework.org/schema/context classpath:org/springframework/context/config/spring-context.xsd
+                           http://www.springframework.org/schema/util classpath:org/springframework/beans/factory/xml/spring-util
+                           http://www.springframework.org/schema/jms classpath:org/springframework/jms/config/spring-jms.xsd
+                           http://activemq.apache.org/schema/core classpath:activemq-core.xsd">
 
     <!-- applciation component scan -->
     <context:component-scan base-package="com.ares" />
 
     <!-- enable the configuration of jms on annotations -->
     <jms:annotation-driven />
-    <bean id="broker" class="org.apache.activemq.broker.BrokerService" init-method="start" destroy-method="stop">
-        <property name="brokerName" value="myBroker"/>
-        <property name="persistent" value="false"/>
-        <property name="transportConnectorURIs">
-            <list>
-                <value>tcp://localhost:61617</value>
-            </list>
-        </property>
-    </bean>
+    <!--  lets create an embedded ActiveMQ Broker -->
+    <amq:broker useJmx="true" persistent="false">
+        <amq:transportConnectors>
+            <amq:transportConnector uri="tcp://localhost:61616" />
+        </amq:transportConnectors>
+        <amq:plugins>
+            <amq:simpleAuthenticationPlugin>
+                <amq:users>
+                    <amq:authenticationUser username="system" password="manager" groups="users,admins"/>
+                    <amq:authenticationUser username="user" password="password" groups="users"/>
+                    <amq:authenticationUser username="guest" password="password" groups="guests"/>
+                </amq:users>
+            </amq:simpleAuthenticationPlugin>
+            <!-- <amq:loggingBrokerPlugin logAll="true" logConnectionEvents="false"/> -->
+            <amq:loggingBrokerPlugin logSessionEvents="true" logConnectionEvents="true" logConsumerEvents="true" logProducerEvents="true"/>
+            <amq:statisticsBrokerPlugin/>
+        </amq:plugins>
 
-    <!-- configure listener container -->
-    <!-- <jms:listener-container message-converter="messageConverter" /> -->
-    
-    <!-- jackson message converter -->
-    <!-- <bean id="messageConverter" class="org.springframework.jms.support.converter.MappingJackson2MessageConverter">
-        <property name="targetType" value="TEXT"/>
-        <property name="typeIdPropertyName" value="_type"/>
-    </bean> -->
+    </amq:broker>
+
+    <!--  ActiveMQ destinations to use  -->
+    <amq:queue id="destination" physicalName="org.apache.activemq.spring.Test.spring.embedded"/>
+
+    <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
+    <!-- <amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost"/> -->
+
 
 </beans>
