@@ -27,6 +27,7 @@ ext {
     versions = [
         activeMQVersion : '5.15.9',
         log4j2Version : '2.11.2',  
+		jasyptVersion : '1.9.3',
 	]
   
 }
@@ -38,8 +39,10 @@ dependencies {
 	implementation "org.apache.activemq:activemq-spring:$versions.activeMQVersion"
 	implementation "org.apache.activemq:activemq-jaas:$versions.activeMQVersion"
 	testImplementation "org.apache.activemq:activemq-kahadb-store:$versions.activeMQVersion"
-	// implementation "org.apache.logging.log4j:log4j-core:$versions.log4j2Version"
-	// implementation "org.apache.logging.log4j:log4j-api:$versions.log4j2Version"
+	implementation "org.jasypt:jasypt:$versions.jasyptVersion"
+	implementation "org.jasypt:jasypt-spring31:$versions.jasyptVersion"
+	implementation "org.apache.logging.log4j:log4j-core:$versions.log4j2Version"
+	implementation "org.apache.logging.log4j:log4j-api:$versions.log4j2Version"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

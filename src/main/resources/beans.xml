@@ -2,35 +2,68 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xmlns:jms="http://www.springframework.org/schema/jms" 
     xmlns:context="http://www.springframework.org/schema/context" 
-    xmlns:amq="http://activemq.apache.org/schema/core" xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:org/springframework/beans/factory/xml/spring-beans.xsd
-                           http://www.springframework.org/schema/context classpath:org/springframework/context/config/spring-context.xsd
-                           http://www.springframework.org/schema/util classpath:org/springframework/beans/factory/xml/spring-util
-                           http://www.springframework.org/schema/jms classpath:org/springframework/jms/config/spring-jms.xsd
-                           http://activemq.apache.org/schema/core classpath:activemq-core.xsd">
+    xmlns:amq="http://activemq.apache.org/schema/core" xsi:schemaLocation="http://www.springframework.org/schema/beans org/springframework/beans/factory/xml/spring-beans.xsd
+                           http://www.springframework.org/schema/context org/springframework/context/config/spring-context.xsd
+                           http://www.springframework.org/schema/util org/springframework/beans/factory/xml/spring-util
+                           http://www.springframework.org/schema/jms org/springframework/jms/config/spring-jms.xsd
+                           http://activemq.apache.org/schema/core activemq-core.xsd">
 
     <!-- applciation component scan -->
     <context:component-scan base-package="com.ares" />
 
     <!-- enable the configuration of jms on annotations -->
     <jms:annotation-driven />
+
+    <bean id="propertyConfigurer" class="com.ares.utilities.crypto.EncryptablePropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:credentials-enc.properties"/>
+    </bean>
+
     <!--  lets create an embedded ActiveMQ Broker -->
-    <amq:broker useJmx="true" persistent="false">
+    <amq:broker useJmx="false" persistent="true" brokerName="trade" splitSystemUsageForProducersConsumers="true" producerSystemUsagePortion="70" consumerSystemUsagePortion="30">
         <amq:transportConnectors>
-            <amq:transportConnector uri="tcp://localhost:61616" />
+            <amq:transportConnector name="tradeProducer" uri="nio://localhost:61616?trace=true;backlog=100;connectionTimeout=30000;daemon=true;keepAlive=true;maximumConnections=100;threadName=tradeProducer;trace=true;useKeepAlive=true;wireFormat.cacheEnabled=true;wireFormat.cacheSize=1024;wireFormat.maxInactivityDuration=30000;wireFormat.maxInactivityDurationInitalDelay=10000" />
+            <amq:transportConnector name="tradeConsumer" uri="nio://localhost:61617?trace=true;backlog=100;connectionTimeout=30000;daemon=true;keepAlive=true;maximumConnections=100;threadName=tradeConsumer;trace=true;useKeepAlive=true;wireFormat.cacheEnabled=true;wireFormat.cacheSize=1024;wireFormat.maxInactivityDuration=30000;wireFormat.maxInactivityDurationInitalDelay=10000" />
         </amq:transportConnectors>
         <amq:plugins>
             <amq:simpleAuthenticationPlugin>
                 <amq:users>
-                    <amq:authenticationUser username="system" password="manager" groups="users,admins"/>
-                    <amq:authenticationUser username="user" password="password" groups="users"/>
-                    <amq:authenticationUser username="guest" password="password" groups="guests"/>
+                    <amq:authenticationUser username="system" password="${activemq.password}" groups="users,admins"/>
+                    <amq:authenticationUser username="user" password="${activemq.password}" groups="users"/>
                 </amq:users>
             </amq:simpleAuthenticationPlugin>
             <!-- <amq:loggingBrokerPlugin logAll="true" logConnectionEvents="false"/> -->
-            <amq:loggingBrokerPlugin logSessionEvents="true" logConnectionEvents="true" logConsumerEvents="true" logProducerEvents="true"/>
+            <amq:loggingBrokerPlugin logSessionEvents="false" logConnectionEvents="true" logConsumerEvents="true" logProducerEvents="true"/>
+            <amq:timeStampingBrokerPlugin ttlCeiling="86400000" zeroExpirationOverride="3600000"/>
             <amq:statisticsBrokerPlugin/>
         </amq:plugins>
+        <amq:persistenceAdapter>
+            <amq:kahaDB directory="activemq-data" indexWriteBatchSize="1000" indexCacheSize="10000" journalMaxFileLength="32mb" cleanupInterval="30000" checkpointInterval="5000"/>
+        </amq:persistenceAdapter>
+        <amq:destinationPolicy>
+            <amq:policyMap>
+                <amq:policyEntries>
+                    <amq:policyEntry producerFlowControl="true" topic="topic.trade.>">
+                        <amq:subscriptionRecoveryPolicy>
+                            <amq:timedSubscriptionRecoveryPolicy recoverDuration="25000"/>
+                        </amq:subscriptionRecoveryPolicy>
+                    </amq:policyEntry>
+                </amq:policyEntries>
+            </amq:policyMap>
+        </amq:destinationPolicy>
 
+        <amq:systemUsage>
+            <amq:systemUsage>
+                <amq:memoryUsage>
+                    <amq:memoryUsage limit="512 mb"/>
+                </amq:memoryUsage>
+                <amq:storeUsage>
+                    <amq:storeUsage limit="10 gb"/>
+                </amq:storeUsage>
+                <amq:tempUsage>
+                    <amq:tempUsage limit="2 gb"/>
+                </amq:tempUsage>
+            </amq:systemUsage>
+        </amq:systemUsage>
     </amq:broker>
 
     <!--  ActiveMQ destinations to use  -->

@@ -1,21 +1,21 @@
 package com.ares.mq;
 
-import java.util.ArrayList;
-import java.util.List;
+// import java.util.ArrayList;
+// import java.util.List;
 
 import javax.jms.Queue;
 
-import org.apache.activemq.broker.BrokerPlugin;
-import org.apache.activemq.broker.BrokerService;
+// import org.apache.activemq.broker.BrokerPlugin;
+// import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.command.ActiveMQQueue;
-import org.apache.activemq.security.AuthenticationUser;
-import org.apache.activemq.security.SimpleAuthenticationPlugin;
-import org.apache.activemq.store.memory.MemoryPersistenceAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
+// import org.apache.activemq.security.AuthenticationUser;
+// import org.apache.activemq.security.SimpleAuthenticationPlugin;
+// import org.apache.activemq.store.memory.MemoryPersistenceAdapter;
+// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
+// import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.jms.annotation.JmsListener;
@@ -25,8 +25,8 @@ import org.springframework.jms.core.JmsTemplate;
 @ImportResource("classpath:beans.xml")
 public class DemoApplication {
 
-	@Autowired
-	private ApplicationContext context;
+	// @Autowired
+	// private ApplicationContext context;
 
 	@Bean
 	public Queue queue() {
